@@ -1,28 +1,38 @@
 #include <Servo.h>
 Servo myservo;  // create servo object to control a servo
-// twelve servo objects can be created on most boards
 
-int pos = 0;    // variable to store the servo position
-int x;
 void setup() {
-  myservo.attach(6);  // attaches the servo on pin 9 to the servo object
+  myservo.attach(6);  // attaches the servo on pin 6 to the servo object
   Serial.begin(115200);
   Serial.setTimeout(1);
-  
 }
 
 void loop() {
   while (!Serial.available());
-  x = Serial.readString().toInt();
-  Serial.print(x + 1); // send back message to confirm script got it
+  String x = Serial.readString();  // Read input as string
+  x.trim();  // remove any newline or spaces
   
-  for (pos = 0+x; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
-    // in steps of 1 degree
-    myservo.write(pos);              // tell servo to go to position in variable 'pos'
-    delay(15);                       // waits 15 ms for the servo to reach the position
+  if (x == "b") {
+    moveServoProgressively(0, 180, 15);  // Slow move from 0 to 180
+  } else if (x == "k") {
+    moveServoProgressively(0, 90, 5);    // Fast move from 0 to 90
+  } else if (x == "m") {
+    moveServoProgressively(0, 90, 5);    // Fast move from 0 to 90 twice
+    moveServoProgressively(0, 90, 5);
   }
-  for (pos = 180; pos >= 0+x; pos -= 1) { // goes from 180 degrees to 0 degrees
-    myservo.write(pos);              // tell servo to go to position in variable 'pos'
-    delay(15);                       // waits 15 ms for the servo to reach the position
+}
+
+// Function to move the servo progressively from startPos to endPos with a delay
+void moveServoProgressively(int startPos, int endPos, int speedDelay) {
+  // Moving servo from startPos to endPos
+  for (int pos = startPos; pos <= endPos; pos++) {
+    myservo.write(pos);
+    delay(speedDelay);
+  }
+
+  // Optionally move back to the start position
+  for (int pos = endPos; pos >= startPos; pos--) {
+    myservo.write(pos);
+    delay(speedDelay);
   }
 }
